@@ -3,3 +3,67 @@
 when HTTP_REQUEST {
    HTTP::response 301 Location "https://redirectedapp.url.com[HTTP::uri]"
 }
+
+# Another type of redirection based on HOST and Uri
+when HTTP_REQUEST {
+   if { [HTTP::host] equals "webpage.example.com" and [HTTP::uri] equals "/" } {
+   HTTP::redirect "https://redirectedapp.example.com[HTTP::uri]"
+   }
+}
+
+# URL redirection with new content
+when HTTP_REQUEST {
+   set mainttime "1:00 AM IST"
+   if {not ([HTTP::cookie] exists "maintance") }  {
+   HTTP::response 200 content
+   {
+    <html>
+    <head>
+    <title>page under maintenance</title>
+    <html>
+    <head>
+    <body>
+    <meta http-equiv="refresh" content="10;url='https://maintenancepage.example.com/'" />
+    <center><p>This page is unavailable from $mainttime till 4:00 AM IST for Maintenance</p>
+    </body>
+    </html>
+    }
+    "Content-Type" "text/html" "Set-Cookie" "maintenance=1"
+  }
+}
+
+
+# Query based redirection
+if { [HTTP::uri] starts_with "/path/to/uri?app_global_context=" } {
+      HTTP::redirect [string map {"/path/to/uri?app_global_context=" "/path/to/newuri/home?current=true&uri=content:path:"} [HTTP::uri]]
+}
+
+
+
+# Redirection with multiple condition
+
+when HTTP_REQUEST {
+   if { [HTTP::host] equals "webpage.example.com" and [HTTP::uri] matches_regex {/webapp/url/path_V_[01234]} } {
+   HTTP::redirect "https://redirecturl.example.com[HTTP::uri]"
+   }
+   elseif { [HTTP::uri] equals "/webapp/home/servlet" }  {
+   HTTP::redirect "https://redirecturl.example.com/webservlet/v1"
+   }
+   elseif { not [HTTP::uri] matches_regex {/(homepage|index)/} }  {
+   HTTP::redirect "https://redirecturl.example.com/home/"
+   }
+   else {
+     HTTP::redirect "https://redirecturl.example.com/Home"
+   }
+}
+
+
+##
+#
+when HTTP_REQUEST {
+   if { ( [HTTP::uri] contains "CustomServlet" ) && 
+        (( [HTTP::uri] contains "Forms" ) || ( [HTTP::uri] contains "ListView" ) ) }  {
+            HTTP::respond 404 content "Not Found"
+            HTTP::close
+   }
+}
