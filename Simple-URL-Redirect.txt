@@ -1,0 +1,5 @@
+# This is an iRule to make simple redirection and of a request from origin URL to new url along with uri path
+
+when HTTP_REQUEST {
+   HTTP::response 301 Location "https://redirectedapp.url.com[HTTP::uri]"
+}
