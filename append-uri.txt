@@ -1,0 +1,6 @@
+when HTTP_REQUEST {
+   switch -globe -- [HTTP::uri] {
+    "/" -
+    "/origin-uri" { HTTP::uri "/dest-uri" }
+   }
+}
