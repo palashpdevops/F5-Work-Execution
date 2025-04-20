@@ -1,0 +1,9 @@
+when HTTP::REQUEST {
+   switch -globe -- [HTTP::host] "webname.url.com" {
+     switch -globe -- [HTTP::uri]  {
+         "/oldweb/path/*" {
+            HTTP::redirect "https://webname.url.com/path/"
+           }
+         }
+     }
+}
