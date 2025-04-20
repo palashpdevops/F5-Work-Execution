@@ -1,0 +1,38 @@
+## This rule is to block access to context path for file type.It is useful when attackers tries to make application unavailable by putting huge loads
+
+when HTTP_REQUEST {
+  switch -globe -- [HTTP::uri]  {
+    "/*testing-put.txt" -
+    "/*.sql" -
+    "/*.zip" -
+    "/*.tar" -
+    "/*.yml" -
+    "/env"
+    {
+     set context "Bad Request"
+      HTTP::response 403 content $content
+      unset content
+      HTTP::close
+    }  
+  }
+}
+
+
+###
+# Another way to do same setup
+
+when HTTP_REQUEST {
+  if { ([HTTP::uri] starts_with "/testing") ||
+       ([HTTP::uri] starts_with "/ddos/attack/") ||
+       ([HTTP::uri] contains "/bad/guys") || 
+       ([HTTP::uri] ends_with ".sql") ||
+       ([HTTP::uri] matches_regex "/*.zip") ||
+       ([HTTP::uri] equals "/attack") }
+      {
+      set context "No Access"
+      HTTP::response 403 content $content
+      unset content
+      HTTP::close
+     }  
+}
+{ drop }
