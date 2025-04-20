@@ -1,0 +1,25 @@
+## Redirection based on User Agent
+
+when HTTP_REQUEST {
+   set uri [URI::decode [HTTP::uri]]
+   set http_host [string tolower [HTTP::host]]
+   set useragent [string tolower [HTTP::header "User-Agent"]]
+   if { ($useragent contains "exampleagent/1.0") } {
+        HTTP::header insert MobileApp
+        }
+   if { ([class match -- $useragent contains demo_agent] 
+       or ($useragent contains "android" and $useragent contains "mobile") )
+       and not ([HTTP::header "header_name"] contains "webheader" )
+       and not ($useragent contains "ipad" )
+       and not ([HTTP::cookie value "mobile_site"] equals "false" )
+       and not ([class match -- [URI::basename] $uri ] ends_with "webapp" )
+      }
+   {
+    if {[ TCP::local_port clientside ] == 80 }  {
+         HTTP::redirect "http://m.$http_host$uri"
+   }  else  {
+      HTTP::redirect "https:://m.$http_host$uri"
+   }
+   return
+  }
+}
