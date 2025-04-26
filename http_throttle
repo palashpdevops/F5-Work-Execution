@@ -1,0 +1,32 @@
+when RULE_INIT {
+  #Max number of requests served within the time interval per the static::timeout variable value
+  set static::mxReqs 10
+  set static::timeout 1200
+}
+when HTTP_REQUEST {
+  if { [class match [HTTP::uri] equals uris-to-throttle] } {
+  # It expects the IP addresses in multiple X-Forwarded-for/True-Client-IP headers
+  if { [HTTP::header exists True-Client-IP] } {
+      set client-IP-addr [getfield [lindex [HTTP::header values True-Client-IP] 0] ","1]
+  } else {
+      set client-IP-addr [IP::client_addr]
+  }
+  set getcount [table lookup -notouch $client-IP-addr ]
+  if { $getcount equals "" }
+      table set client-IP-addr "1" $static::timeout
+} else {
+  if { $getcount <  $static::mxReqs }  {
+   log local0. "Request count for $client-IP-addr is $getcount"
+   table incr -notouch $client-IP-addr
+  } else  {
+     log local0. "Blocking: Request count for $client-IP-addr is $getcount" 
+     HTTP::respond 403 content {
+     <html>
+     <head><title>HTTP request denied</title></head>
+     <body></body>
+     </html>
+     }
+  }
+}
+}
+}
