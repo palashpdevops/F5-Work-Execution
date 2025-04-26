@@ -1,0 +1,15 @@
+##
+when HTTP_RESPONSE_RELEASE {
+  if {!([HTTP::header exists "X-Frame-Options"])}  {
+    HTTP::header insert "X-Frame-Options" "DENY"
+  }
+  if {!([HTTP::header exists "X-XSS-Protection"])}  {
+    HTTP::header insert "X-XSS-Protection" "1; mode=block"
+  }
+  if {!([HTTP::header exists "X-Content-Type-Options"])}  {
+    HTTP::header insert "X-Content-Type-Options" "nosniff"
+  }
+  if {!([HTTP::header exists "Strict-Transport-Security"])}  {
+    HTTP::header insert "Strict-Transport-Security" "max-age=16070400; includeSubDomains"
+  }   
+}
