@@ -1,0 +1,4 @@
+## Landing page redirection after 10 secs
+when HTTP_REQUEST {
+HTTP::respond 200 content "<html><head><title>This is is moved</title><meta http-equiv=\"refresh\" content=\"10; url=\"https://redirect.com/"></head></body></html>" "Content-Type" "test/html"
+}
