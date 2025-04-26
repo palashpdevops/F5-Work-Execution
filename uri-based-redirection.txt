@@ -7,3 +7,68 @@ when HTTP::REQUEST {
          }
      }
 }
+
+
+##
+when HTTP::REQUEST {
+     switch -globe -- [HTTP::uri]  {
+         "/oldweb/path/*" { pool /Common/example-vip1.com_443 }
+         "/services/*" { pool /Common/example-vip2.com_443 }
+         "/web/*" { pool /Common/example-vip3.com_443 }
+         "/" { pool /Common/example-vip4.com_443 }
+         default { pool /Common/example-vip.com_443 } 
+         }
+}
+
+##
+when HTTP::REQUEST {
+   set http_host [string tolower [HTTP::host]]
+   set uri [URI::decode [HTTP::uri]]
+
+     switch -- $http_host  {
+         "example1.com" { pool /Common/example-vip1.com_443 }
+         "example2.com" { pool /Common/example-vip2.com_443 }
+         "example3.com" { pool /Common/example-vip3.com_443 }
+         "example4.com" { pool /Common/example-vip4.com_443 }
+         "example.com" { pool /Common/example-vip.com_443 
+         if { [TCP::local_port clientside] == 80 } {
+           switch -- [string tolower $uri] {
+              "/ac/bc/xyz/file_1.htm" -
+              "/ac/bc/xyz/file_2.htm" -
+              "/ac/bc/xyz/file_3.htm" { HTTP::redirect "https://$http_host$uri" }
+           } 
+         }
+   }
+   default { HTTP::redirect "https://palash.com/abc/logon?client=410" }
+   }
+}
+
+
+##  Pool forwarding based on URIs
+when HTTP::REQUEST { 
+   if { [HTTP::host] equals "example.com" and  [HTTP::uri] matches_regex {/path/to/url/Services_V1_[12345] } }  { 
+         pool app_vip1_443  
+      }
+   if { [HTTP::host] equals "example.com" and  [HTTP::uri] matches_regex {/path/to/url/Services_V[234]_[12345] } }  { 
+         pool app_vip1_443  
+      }
+   if { [HTTP::host] equals "example.com" and  [HTTP::uri] equals "/services/apps/InfoWS" }  { 
+         pool app_vip2_443  
+      }
+}
+
+
+##  Pool forwarding based on URIs rule2
+when HTTP::REQUEST { 
+   switch [HTTP::path] { 
+        "/WS/services/customer/apps" {
+           HTTP::uri "/apps/download/V1\?[HTTP::query]"
+           pool example_vipname_443  
+      }
+        "/servlet/services/example1" {
+           HTTP::uri "/apps/dfile/V1\?[HTTP::query]"
+           pool example_vipname_443  
+      }
+      default { HTTP::redirect "https://customerapps.com/" }
+   }
+}
