@@ -36,3 +36,16 @@ when HTTP_REQUEST {
      }  
 }
 { drop }
+
+
+################################
+# Disable access for cloud calls
+when HTTP_REQUEST {
+  if { [HTTP::uri] starts_with "/testing"  }
+      {
+      if { not ([class match [IP::remote_addr] equals InternalAddr ]) }  {
+          HTTP::respond 503 content "Site not available"
+          }
+      }
+  }  
+}
