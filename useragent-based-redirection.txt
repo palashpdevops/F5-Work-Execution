@@ -30,3 +30,15 @@ when HTTP_REQUEST {
       drop
    }
 }
+
+
+##############################
+when HTTP_REQUEST {
+   HTTP::header insert x-sap-webapp "HTTPS=443"
+   switch -globe -- [string tolower [HTTP::header "User-Agent"]] {
+      "word" -
+      "excel" -
+      "ms-office" -
+      "shareplus" { HTTP::respond 200 }
+   }
+}
