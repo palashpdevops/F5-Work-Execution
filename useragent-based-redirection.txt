@@ -23,3 +23,10 @@ when HTTP_REQUEST {
    return
   }
 }
+
+###  Block bad user agent
+when HTTP_REQUEST {
+   if { [class match [HTTP::header "User-Agent" ] contains bad-user-agents ] }    {
+      drop
+   }
+}
