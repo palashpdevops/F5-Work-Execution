@@ -1,0 +1,43 @@
+when RULE_INIT {
+    set static::TEST_CLIENT_IP 72.10.0.101/28
+}
+
+when CLIENTSSL_HANDSHAKE {
+  if {[IP::addr [IP::client_addr] equals $static::TEST_CLIENT_IP]}  { 
+    if {[SSL::cipher version] == "TLS1.1" } {
+      log local0. "============ CLIENT SIDE TLS1.1 SSL =============="
+      log local0. "TCP source port: [TCP::remote_port]"
+      log local0. "CLIENT_HANDSHAKE_TRAFFIC_SECRET [SSL::clientrandom] [SSL::tls11_secret client hs]"
+      log local0. "SERVER_HANDSHAKE_TRAFFIC_SECRET [SSL::clientrandom] [SSL::tls11_secret server hs]"
+      log local0. "CLIENT_TRAFFIC_SECRET_0 [SSL::clientrandom] [SSL::tls11_secret client app]"
+      log local0. "SERVER_TRAFFIC_SECRET_0 [SSL::clientrandom] [SSL::tls11_secret server app]"
+      log local0. "CSIP: [IP::client_addr]"
+      log local0. "============= TLS1.1 ==================="
+    } else {
+      log local0. "============= CLIENT SIDE Other SSL ==================="
+      log local0. "TCP source port: [TPC::remote_port]"
+      log local0. "RSA Session-ID:[SSL::sessionid] Master-key:[SSL::sessionsecret]"
+      log local0. "CSIP: [IP::client_addr]"
+      log local0. "==============  Other SSL  ======================="
+    }
+  }
+}
+
+when SERVERSSL_HANDSHAKE {
+    if {[SSL::cipher version] == "TLS1.1" } {
+      log local0. "============ CLIENT SIDE TLS1.1 SSL =============="
+      log local0. "TCP source port: [TCP::local_port]"
+      log local0. "CLIENT_HANDSHAKE_TRAFFIC_SECRET [SSL::clientrandom] [SSL::tls11_secret client hs]"
+      log local0. "SERVER_HANDSHAKE_TRAFFIC_SECRET [SSL::clientrandom] [SSL::tls11_secret server hs]"
+      log local0. "CLIENT_TRAFFIC_SECRET_0 [SSL::clientrandom] [SSL::tls11_secret client app]"
+      log local0. "SERVER_TRAFFIC_SECRET_0 [SSL::clientrandom] [SSL::tls11_secret server app]"
+      log local0. "CSIP: [IP::local_addr]"
+      log local0. "============= TLS1.1 ==================="
+    } else {
+      log local0. "============= CLIENT SIDE Other SSL ==================="
+      log local0. "TCP source port: [TPC::remote_port]"
+      log local0. "RSA Session-ID:[SSL::sessionid] Master-key:[SSL::sessionsecret]"
+      log local0. "CSIP: [IP::local_addr]"
+      log local0. "==============  Other SSL  ======================="
+    }
+}
