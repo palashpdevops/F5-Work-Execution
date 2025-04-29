@@ -1,0 +1,11 @@
+when HTTP_REQUEST {
+  if {[HTTP::uri] starts_with "/homepath" } {
+    set uri [ string map -nocase {"/homepath" "" }   [HTTP::uri]
+    set auth-token [HTTP::header value "Authorization"]
+    regsub -nocase {^Bearer} $auth-token "" auth-token
+    HTTP::redirect "https://example.com$uri?token=$auth-token"
+    HTTP::header insert name "Authorization" $auth-token
+    
+  }
+}
+
