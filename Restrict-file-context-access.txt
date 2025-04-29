@@ -49,3 +49,14 @@ when HTTP_REQUEST {
       }
   }  
 }
+
+
+################################
+# Block access from VPN
+when HTTP_REQUEST {
+  if { [IP::remote_addr] starts_with "10.72."  }
+      {
+        HTTP::respond 503 content "Site not available"
+#       HTTP::redirect "http://nosite.com/"
+      } 
+}
